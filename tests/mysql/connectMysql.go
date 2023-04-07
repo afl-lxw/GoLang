@@ -23,18 +23,21 @@ func Mysql_start() {
 		return
 	}
 	//查询表
-	rows, errs := db.Query("select * from tags")
+	rows, errs := db.Query("select tags.id, tags.tagname, tags.isDelete from tags")
 	if errs != nil {
 		fmt.Println("数据库连接失败------", errs)
 		return
 	}
 	fmt.Println("\n", rows)
+
 	//遍历打印
 	for rows.Next() {
 		var id int
 		var tagname string
-		rows.Scan(&id, &tagname)
-		fmt.Println(id, tagname)
+		var deletes bool
+
+		rows.Scan(&id, &tagname, &deletes)
+		fmt.Println(id, tagname, deletes)
 	}
 	//用完关闭
 	rows.Close()

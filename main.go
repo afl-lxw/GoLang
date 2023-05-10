@@ -3,6 +3,7 @@ package main
 import (
 	"Golang/database"
 	"Golang/routes"
+	"fmt"
 )
 
 func main() {
@@ -11,5 +12,10 @@ func main() {
 	database.InitDB()
 	defer database.CloseDB()
 
-	routes.InitRouter()
+	router := routes.InitRouter()
+
+	// 启动服务
+	if err := router.Engine.Run(":8080"); err != nil {
+		fmt.Println("Server Error: ", err)
+	}
 }

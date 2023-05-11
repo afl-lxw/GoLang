@@ -4,20 +4,22 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
-	"github.com/spf13/viper"
-
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/spf13/viper"
 	"log"
 )
 
 var db *sql.DB
 
+func GetDB() *sql.DB {
+	return db
+}
+
 // InitDB 初始化数据库连接
 func InitDB() {
-
 	// 使用 flag 包从命令行中读取配置文件路径，默认为 config.toml
 	var configPath string
-	flag.StringVar(&configPath, "config", "config.toml", "path to config file")
+	flag.StringVar(&configPath, "conf", "./conf/config.yaml", "path to config file")
 	flag.Parse()
 
 	// 使用 viper 读取配置文件

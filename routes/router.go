@@ -16,7 +16,10 @@ func InitRouter() *Router {
 	//r := New()
 
 	// 初始化 RouterGroup
-	routerGroup := engine.Group("")
+	routerGroup := engine.Group("v1")
+
+	// 注册 v1 版本的路由处理函数
+	RegisterV1HandlersUser(routerGroup)
 
 	//engine.Run("127.0.0.1:8080")
 

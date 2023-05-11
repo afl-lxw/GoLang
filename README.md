@@ -17,3 +17,6 @@ docker-
 ```
 redis-
 ```
+```
+swag init 初始化接口文档一下
+```

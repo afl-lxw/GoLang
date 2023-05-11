@@ -20,6 +20,13 @@ func GetUserList(db *sql.DB) *UserHandler {
 	return &UserHandler{db: db, user: u}
 }
 
+// GetUserList @Summary 获取用户列表
+// @Description 获取所有用户的列表数据
+// @Tags 用户管理
+// @Produce json
+// @Success 200 {object} 返回用户列表数据
+// @Failure 500 {object} 返回错误信息
+// @Router /users [get]
 func (h *UserHandler) GetUserList(c *gin.Context) {
 	// 执行 SQL 语句，获取用户列表数据
 	rows, err := h.db.Query("SELECT Id, Username, Age,Gender,Mobile,create_at,update_at,User_Id,Password,IsDelete,Salt FROM user")
@@ -30,7 +37,12 @@ func (h *UserHandler) GetUserList(c *gin.Context) {
 		})
 		return
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			err.Error()
+		}
+	}(rows)
 
 	// 将查询结果保存到 users 数组中
 	var users []map[string]interface{}

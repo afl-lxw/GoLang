@@ -6,6 +6,11 @@ import (
 	"fmt"
 )
 
+// @title goweb project
+// @version 1.0
+// @description this is goweb server.
+// @host 127.0.0.1:6912
+// @BasePath /api/v1
 func main() {
 	//tests.InitTest()
 	// 初始化数据库连接

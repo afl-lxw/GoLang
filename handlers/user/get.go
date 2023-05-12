@@ -1,21 +1,21 @@
 package user
 
 import (
-	"database/sql"
+	UserType "Golang/models/user"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"time"
+	"gorm.io/gorm"
+	"strconv"
 )
 
 type UserHandler struct {
-	db   *sql.DB
-	user *Usertype
+	db   *gorm.DB
+	user *UserType.User
 }
 
 const layout = "2006-01-02 15:04:05"
 
-func GetUserList(db *sql.DB) *UserHandler {
-	u := &Usertype{}
+func GetUserList(db *gorm.DB) *UserHandler {
+	u := &UserType.User{}
 	// 可以在这里进行依赖注入
 	return &UserHandler{db: db, user: u}
 }
@@ -24,77 +24,54 @@ func GetUserList(db *sql.DB) *UserHandler {
 // @Description 获取所有用户的列表数据
 // @Tags 用户管理
 // @Produce json
+// @Param page query int false "页码"
+// @Param size query int false "每页数量"
+// @Param keyword query string false "关键词"
 // @Success 200 {object} 返回用户列表数据
 // @Failure 500 {object} 返回错误信息
 // @Router /users [get]
 func (h *UserHandler) GetUserList(c *gin.Context) {
-	// 执行 SQL 语句，获取用户列表数据
-	rows, err := h.db.Query("SELECT Id, Username, Age,Gender,Mobile,create_at,update_at,User_Id,Password,IsDelete,Salt FROM user")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	size, _ := strconv.Atoi(c.DefaultQuery("size", "10"))
+	keyword := c.Query("keyword")
+
+	// 查询总数
+	var count int64
+	query := h.db.Model(h.user)
+	if keyword != "" {
+		query = query.Where("Username LIKE ?", "%"+keyword+"%").Or("Mobile LIKE ?", "%"+keyword+"%")
+	}
+	query.Count(&count)
+
+	// 分页查询
+	var userList []*UserType.User
+	//err := query.Offset((page - 1) * size).Limit(size).Find(&userList).Error
+	// 分页查询用户列表，并只返回指定的字段
+	err := query.Select("id, username, age, gender, mobile, create_at, update_at, isDelete").
+		Limit(size).Offset((page - 1) * size).Find(&userList).Error
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "获取用户列表失败",
-			"error":   err.Error(),
-		})
-		return
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			err.Error()
-		}
-	}(rows)
-
-	// 将查询结果保存到 users 数组中
-	var users []map[string]interface{}
-	var createdAtStr, updatedAtStr, UserId string
-	for rows.Next() {
-		err := rows.Scan(
-			&h.user.Id,
-			&h.user.Username,
-			&h.user.Age,
-			&h.user.Gender,
-			&h.user.Mobile,
-			&createdAtStr,
-			&updatedAtStr,
-			&UserId,
-			&h.user.Password,
-			&h.user.IsDelete,
-			&h.user.Salt,
-		)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "获取用户列表失败~",
-				"error":   err.Error(),
-			})
-			return
-		}
-		createdAt, err := time.Parse(layout, createdAtStr)
-		updatedAt, err := time.Parse(layout, updatedAtStr)
-		h.user.CreateAt = createdAt
-		h.user.UpdateAt = updatedAt
-		user := map[string]interface{}{
-			"id":         h.user.Id,
-			"username":   h.user.Username,
-			"age":        h.user.Age,
-			"gender":     h.user.Gender,
-			"mobile":     h.user.Mobile,
-			"created_at": h.user.CreateAt,
-			"updated_at": h.user.UpdateAt,
-		}
-		users = append(users, user)
-	}
-	if err = rows.Err(); err != nil {
-		// 处理查询出错的情况
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "获取用户列表失败---",
-			"error":   err.Error(),
+		c.JSON(500, gin.H{
+			"message": "查询用户列表失败",
+			"data":    nil,
 		})
 		return
 	}
 
-	// 返回用户列表数据
-	c.JSON(http.StatusOK, gin.H{
-		"message": "获取用户列表成功",
-		"data":    users,
+	var pageNext bool
+	if int64(page*size) < count {
+		pageNext = true
+	} else {
+		pageNext = false
+	}
+
+	c.JSON(200, gin.H{
+		"message": "",
+		"data": gin.H{
+			"total":    count,
+			"page":     page,
+			"size":     size,
+			"data":     userList,
+			"pageNext": pageNext,
+		},
 	})
 }

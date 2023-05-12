@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"Golang/database"
 	_ "Golang/docs" // 导入 API 文档
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -13,6 +14,8 @@ type Router struct {
 }
 
 func InitRouter() *Router {
+	database.InitDB()
+	//defer database.CloseDB()
 	// 创建一个路由
 	//engine := gin.Default()
 	engine := gin.New()

@@ -47,7 +47,7 @@ func (h *UserHandler) GetUserList(c *gin.Context) {
 	var userList []*UserType.User
 	//err := query.Offset((page - 1) * size).Limit(size).Find(&userList).Error
 	// 分页查询用户列表，并只返回指定的字段
-	err := query.Select("id, username, age, gender, mobile, create_at, update_at, isDelete").
+	err := query.Select("id, username, age, sex, mobile, create_at, update_at, is_delete").
 		Limit(size).Offset((page - 1) * size).Find(&userList).Error
 	if err != nil {
 		c.JSON(500, gin.H{

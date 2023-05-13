@@ -33,27 +33,21 @@ func CreateUser(db *gorm.DB) *UserCreate {
 // @Failure 500 {object} ErrorResponse "服务器错误"
 // @Router /users [post]
 func (h *UserCreate) UserCreate(c *gin.Context) {
-	types := c.DefaultPostForm("type", "post")
-	username := c.PostForm("username")
-	password := c.PostForm("password")
-	fmt.Sprintf("username:%s,password:%s,==========type:%s", username, password, types)
+	c.DefaultPostForm("sex", "other")
 
-	for key, values := range c.Request.Form {
-		fmt.Printf("%s:---- %v\n", key, values)
-	}
-
-	for key, values := range c.Request.PostForm {
-		fmt.Printf("%s:=== %v\n", key, values)
-	}
-
-	if err := c.ShouldBindJSON(h.userType); err != nil {
+	if err := c.ShouldBind(h.userType); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "请求错误"})
 		return
 	}
 	fmt.Println("username:", h.userType.Username)
 	fmt.Println("password:", h.userType.Password)
+	fmt.Println("username:", h.userType.Mobile)
+	fmt.Println("password:", h.userType.Email)
 
-	h.db.AutoMigrate(h.userType)
+	if MigErr := h.db.AutoMigrate(h.userType); MigErr != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": MigErr.Error(), "message": "创建失败"})
+		return
+	}
 
 	h.db.Create(&h.userType)
 

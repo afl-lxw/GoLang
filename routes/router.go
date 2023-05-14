@@ -27,6 +27,7 @@ func InitRouter() *Router {
 
 	// 注册 v1 版本的路由处理函数
 	RegisterV1HandlersUser(routerGroup)
+	RegisterV1HandlersLogin(routerGroup)
 
 	//engine.Run("127.0.0.1:8080")
 

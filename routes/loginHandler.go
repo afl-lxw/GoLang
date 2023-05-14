@@ -12,4 +12,5 @@ func RegisterV1HandlersLogin(routerGroup *gin.RouterGroup) {
 	loginHandler := login.NewLogin(db)
 	routerGroup.GET("/login", loginHandler.Login)
 	routerGroup.POST("/login-out", loginHandler.LoginOut)
+	routerGroup.GET("/captcha", loginHandler.Captcha)
 }

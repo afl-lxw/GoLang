@@ -26,7 +26,7 @@ type User struct {
 	UpdatedAt time.Time `json:"updated_at"  gorm:"column:update_at; comment:'修改时间'"`
 	UserId    uuid.UUID `json:"user_id"  gorm:"column:user_id; comment: '用户Uid'"`
 	IsDelete  int       `json:"is_delete"   gorm:"column:is_delete; comment:'软删除'"`
-	Salt      string    `json:"salt"  gorm:"column:salt; comment:'密码盐' "`
+	Salt      []byte    `json:"salt"  gorm:"column:salt; comment:'密码盐' "`
 }
 
 type GormUser struct {

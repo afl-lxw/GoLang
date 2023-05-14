@@ -2,6 +2,8 @@ package user
 
 import (
 	userOrm "Golang/models/user"
+	"Golang/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -51,6 +53,20 @@ func (h *UserCreate) UserCreate(c *gin.Context) {
 	}
 	h.userType.CreatedAt = time.Now()
 	h.userType.UpdatedAt = time.Now()
+
+	// 生成一个长度为 16 的随机盐
+
+	salt, err := utils.RandSalt()
+	if err != nil {
+		fmt.Printf("生成随机盐失败: %v", err)
+	}
+	h.userType.Salt = salt
+	password, errPass := utils.PasswordHash(h.userType.Password)
+
+	if errPass != nil {
+		fmt.Printf("密码加密失败: %v", errPass)
+	}
+	h.userType.Password = password
 
 	result := h.db.Create(h.userType)
 	if result.Error != nil {

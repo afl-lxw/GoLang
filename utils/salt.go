@@ -1,6 +1,10 @@
 package utils
 
-import "golang.org/x/crypto/bcrypt"
+import (
+	"crypto/rand"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+)
 
 // 密码加密
 func PasswordHash(pwd string) (string, error) {
@@ -13,10 +17,21 @@ func PasswordHash(pwd string) (string, error) {
 	return string(bytes), err
 }
 
+func RandSalt() ([]byte, error) {
+	salt := make([]byte, 16)
+	_, err := rand.Read(salt)
+	if err != nil {
+		return salt, err
+	}
+	fmt.Println("---- salt ----%v", salt)
+
+	return salt, err
+}
+
 // 密码验证
 func PasswordVerify(pwd, hash string) bool {
 	// CompareHashAndPassword 方法将加密的数据与原始数据进行对比
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(pwd))
+	err := bcrypt.CompareHashAndPassword([]byte(pwd), []byte(hash))
 
 	return err == nil
 }

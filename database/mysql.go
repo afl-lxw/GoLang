@@ -44,6 +44,7 @@ func InitDB() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	CheckDatabase(db)
 
 	fmt.Println("Successfully connected to the database!")
 }

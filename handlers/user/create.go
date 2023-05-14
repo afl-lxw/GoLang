@@ -2,10 +2,11 @@ package user
 
 import (
 	userOrm "Golang/models/user"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"net/http"
+	"time"
 )
 
 type UserCreate struct {
@@ -33,23 +34,28 @@ func CreateUser(db *gorm.DB) *UserCreate {
 // @Failure 500 {object} ErrorResponse "服务器错误"
 // @Router /users [post]
 func (h *UserCreate) UserCreate(c *gin.Context) {
-	c.DefaultPostForm("sex", "other")
 
 	if err := c.ShouldBind(h.userType); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "请求错误"})
 		return
 	}
-	fmt.Println("username:", h.userType.Username)
-	fmt.Println("password:", h.userType.Password)
-	fmt.Println("username:", h.userType.Mobile)
-	fmt.Println("password:", h.userType.Email)
 
-	if MigErr := h.db.AutoMigrate(h.userType); MigErr != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": MigErr.Error(), "message": "创建失败"})
+	h.userType.UserId = uuid.New()
+	// 校验并设置性别
+	if h.userType.Sex == "" {
+		h.userType.Sex = "其他"
+	}
+	if h.userType.Sex != "男" && h.userType.Sex != "女" && h.userType.Sex != "其他" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid sex"})
 		return
 	}
+	h.userType.CreatedAt = time.Now()
+	h.userType.UpdatedAt = time.Now()
 
-	h.db.Create(&h.userType)
-
+	result := h.db.Create(h.userType)
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error, "message": "数据创建失败"})
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"Data": true, "Message": "创建成功"})
 }

@@ -2,69 +2,81 @@ package redis
 
 import (
 	"Golang/config"
+	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/go-redis/redis/v8"
 )
 
-// RedisStore 是 Redis 客户端的封装
-type RedisStore struct {
-	client *redis.Client
+type Redis struct {
+	Client *redis.Client
 }
 
-var _ *config.Configure
+func InitRedis(cfg *config.RedisConfig) (*Redis, error) {
 
-// NewRedisStore 返回一个 RedisStore 实例
-func NewRedisStore(configs *config.Redis) *RedisStore {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "", // 设置 Redis 密码
-		DB:       0,  // 使用默认的数据库
+	Client := redis.NewClient(&redis.Options{
+		Addr:         cfg.Host,
+		Password:     cfg.Password,
+		DB:           cfg.Database,
+		PoolSize:     10,
+		MinIdleConns: 5,
+		IdleTimeout:  cfg.IdleTimeout,
 	})
 
-	_, err := rdb.Ping(rdb.Context()).Result()
-	if err != nil {
-		panic(err)
-	}
-	// 存储 Redis 配置信息到全局变量
-	_ = &config.Configure{
-		Redis: configs,
-	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	//config.Configure{  }
-	return &RedisStore{client: rdb}
+	if err := Client.Ping(ctx).Err(); err != nil {
+		return nil, errors.New("failed to connect to Redis")
+	}
+	fmt.Println("Successfully connected to the Redis!")
+
+	return &Redis{Client: Client}, nil
 }
 
-// Set 将一个键值对写入 Redis
-func (rs *RedisStore) Set(key string, value interface{}, expiration time.Duration) error {
-	err := rs.client.Set(rs.client.Context(), key, value, expiration).Err()
-	if err != nil {
-		return fmt.Errorf("failed to set key %s: %w", key, err)
-	}
+func (r *Redis) Get(key string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-	return nil
-}
-
-// Get 从 Redis 中获取指定键的值
-func (rs *RedisStore) Get(key string) (string, error) {
-	value, err := rs.client.Get(rs.client.Context(), key).Result()
+	val, err := r.Client.Get(ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
-			return "", fmt.Errorf("key %s does not exist", key)
+			return "", errors.New("key does not exist")
 		}
-		return "", fmt.Errorf("failed to get key %s: %w", key, err)
+		return "", err
 	}
 
-	return value, nil
+	return val, nil
 }
 
-// Del 从 Redis 中删除指定键
-func (rs *RedisStore) Del(key string) error {
-	err := rs.client.Del(rs.client.Context(), key).Err()
+func (r *Redis) Set(key string, value interface{}, expiration time.Duration) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return r.Client.Set(ctx, key, value, expiration).Err()
+}
+
+func (r *Redis) Delete(key string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	return r.Client.Del(ctx, key).Err()
+}
+
+func (r *Redis) Exists(key string) (bool, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	val, err := r.Client.Exists(ctx, key).Result()
 	if err != nil {
-		return fmt.Errorf("failed to delete key %s: %w", key, err)
+		return false, err
 	}
 
-	return nil
+	return val == 1, nil
+}
+
+func (r *Redis) Close() error {
+	return r.Client.Close()
 }

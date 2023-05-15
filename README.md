@@ -15,8 +15,12 @@ docker-
 ```
 
 ```
-redis-
-```
+
+## redis
+
+```bash
+$ redis-server
+$ redis-cli (test)
 ```
 swag init 初始化接口文档一下
 ```

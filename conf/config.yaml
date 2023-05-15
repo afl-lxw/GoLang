@@ -1,9 +1,12 @@
 database:
   host: localhost
   port: 3306
-#  user: xiaowen
-  user: root
-#  password: xiaowen
+  user: liu
   password: 809000liuLIU
-#  name: node
   name: golang
+
+redis:
+  host: localhost
+  port: 6379
+  password: ""
+  db: 0

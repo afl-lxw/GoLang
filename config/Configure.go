@@ -1,20 +1,28 @@
 package config
 
 import (
+	"github.com/go-redis/redis/v8"
 	"time"
 )
 
 type (
+	RedisConfig struct {
+		Host                 string
+		Password             string
+		Database             int
+		IdleTimeout          time.Duration
+		APIServerTaskRecover string
+		APIServerTaskPause   string
+		APIServerTaskStop    string
+	}
 	Redis struct {
-		Host        string
-		Password    string
-		Database    int
-		IdleTimeout time.Duration
+		Client *redis.Client
 	}
 )
 
 type (
 	Configure struct {
-		Redis *Redis
+		Redis       *RedisConfig
+		RedisClient *Redis
 	}
 )

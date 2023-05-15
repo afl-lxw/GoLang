@@ -3,7 +3,6 @@ package login
 import (
 	"Golang/config"
 	"Golang/utils"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"net/http"
@@ -26,12 +25,15 @@ type LoginForm struct {
 	Mobile   string `form:"mobile" binding:"required"`
 	Password string `form:"password" binding:"required"`
 	Captcha  string `form:"captcha" binding:"required"`
+	Id       string `form:"id" binding:"required"`
 }
 
 func (h *LoginType) Login(c *gin.Context) {
 	mobile := c.PostForm("mobile")
-	//password := c.PostForm("password")
+	password := c.PostForm("password")
 	captcha := c.PostForm("captcha")
+	id := c.PostForm("id")
+	println("id: ", id, "captcha: ", captcha, "mobile: ", mobile, "password: ", password)
 	var form LoginForm
 	if err := c.ShouldBind(&form); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -40,9 +42,8 @@ func (h *LoginType) Login(c *gin.Context) {
 
 	// TODO: 验证验证码是否正确
 	// 验证验证码是否正确
-	fmt.Println("captcha: ", captcha)
-	fmt.Println("mobile: ", mobile)
-
+	capValue := utils.VerifyCaptcha(form.Id, form.Captcha)
+	println("capValue: ", capValue)
 	// TODO: 验证用户名和密码是否正确
 
 	// 登录成功
@@ -58,7 +59,7 @@ func (h *LoginType) LoginOut(c *gin.Context) {
 func (h *LoginType) Captcha(c *gin.Context) {
 
 	if id, b64s, err := utils.MakeCaptcha(); err == nil {
-		err := h.config.RedisClient.Client.Set("captcha_id", id, 0)
+		//err := h.config.RedisClient.Client.Set("captcha_id", id, 0)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "验证码生成失败",

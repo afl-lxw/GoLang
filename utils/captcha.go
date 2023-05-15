@@ -20,8 +20,8 @@ func MakeCaptcha() (string, string, error) {
 		Height:          40,                                     //高度
 		Width:           100,                                    //宽度
 		NoiseCount:      0,                                      //干扰数
-		ShowLineOptions: 2 | 4,                                  //展示个数
-		Length:          1,                                      //长度
+		ShowLineOptions: 0,                                      //展示个数
+		Length:          4,                                      //长度
 		Source:          "1234567890qwertyuioplkjhgfdsazxcvbnm", //验证码随机字符串来源
 		BgColor: &color.RGBA{ // 背景颜色
 			R: 3,

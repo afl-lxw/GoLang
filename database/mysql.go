@@ -52,7 +52,9 @@ func InitDB() {
 	//		IdleTimeout: 10 * time.Minute,
 	//	},
 	//}
-	_, RedisErr := redis.InitRedis()
+	redisConfig, RedisErr := redis.InitRedis()
+	println("redisConfig:----->", redisConfig)
+
 	if RedisErr != nil {
 		panic(RedisErr)
 	}

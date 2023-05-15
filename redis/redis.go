@@ -37,7 +37,8 @@ func InitRedis() (*Redis, error) {
 		return nil, errors.New("failed to connect to Redis")
 	}
 	fmt.Println("Successfully connected to the Redis!")
-	return &Redis{Client: Client}, nil
+	r := &Redis{Client: Client}
+	return r, nil
 }
 
 func (r *Redis) Get(key string) (string, error) {
@@ -59,7 +60,8 @@ func (r *Redis) Set(key string, value interface{}, expiration time.Duration) err
 	fmt.Println("key--->:", key, "value:", value, "expiration:", expiration)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
+	fmt.Println("ctx:", ctx)
+	fmt.Println("r.Client:", r.Client)
 	return r.Client.Set(ctx, key, value, expiration).Err()
 }
 

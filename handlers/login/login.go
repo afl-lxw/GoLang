@@ -58,7 +58,7 @@ func (h *LoginType) LoginOut(c *gin.Context) {
 func (h *LoginType) Captcha(c *gin.Context) {
 
 	if id, b64s, err := utils.MakeCaptcha(); err == nil {
-		//err := h.config.RedisClient.Client.Set("captcha_id", id, 0)
+		err := h.config.RedisClient.Client.Set("captcha_id", id, 0)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "验证码生成失败",

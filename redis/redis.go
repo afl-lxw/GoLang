@@ -1,10 +1,11 @@
 package redis
 
 import (
-	"Golang/config"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/spf13/viper"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -14,15 +15,19 @@ type Redis struct {
 	Client *redis.Client
 }
 
-func InitRedis(cfg *config.RedisConfig) (*Redis, error) {
-
+func InitRedis() (*Redis, error) {
+	addr := viper.GetString("redis.host")
+	redisPort := viper.GetInt("redis.port")
+	addr = addr + ":" + strconv.Itoa(redisPort)
+	redisPassword := viper.GetString("redis.password")
+	redisDB := viper.GetInt("redis.db")
 	Client := redis.NewClient(&redis.Options{
-		Addr:         cfg.Host,
-		Password:     cfg.Password,
-		DB:           cfg.Database,
+		Addr:         addr,
+		Password:     redisPassword,
+		DB:           redisDB,
 		PoolSize:     10,
 		MinIdleConns: 5,
-		IdleTimeout:  cfg.IdleTimeout,
+		IdleTimeout:  10 * time.Minute,
 	})
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -32,7 +37,6 @@ func InitRedis(cfg *config.RedisConfig) (*Redis, error) {
 		return nil, errors.New("failed to connect to Redis")
 	}
 	fmt.Println("Successfully connected to the Redis!")
-
 	return &Redis{Client: Client}, nil
 }
 
@@ -52,6 +56,7 @@ func (r *Redis) Get(key string) (string, error) {
 }
 
 func (r *Redis) Set(key string, value interface{}, expiration time.Duration) error {
+	fmt.Println("key--->:", key, "value:", value, "expiration:", expiration)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

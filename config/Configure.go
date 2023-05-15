@@ -1,7 +1,7 @@
 package config
 
 import (
-	"github.com/go-redis/redis/v8"
+	Selfredis "Golang/redis"
 	"time"
 )
 
@@ -16,7 +16,7 @@ type (
 		APIServerTaskStop    string
 	}
 	Redis struct {
-		Client *redis.Client
+		Client *Selfredis.Redis
 	}
 )
 

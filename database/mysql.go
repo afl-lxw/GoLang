@@ -1,7 +1,6 @@
 package database
 
 import (
-	"Golang/config"
 	"Golang/redis"
 	"flag"
 	"fmt"
@@ -10,8 +9,6 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"strconv"
-	"time"
 )
 
 var db *gorm.DB
@@ -42,24 +39,24 @@ func InitDB() {
 	password := viper.GetString("database.password")
 	name := viper.GetString("database.name")
 
-	addr := viper.GetString("redis.host")
-	redisPort := viper.GetInt("redis.port")
-	addr = addr + ":" + strconv.Itoa(redisPort)
-	redisPassword := viper.GetString("redis.password")
-	redisDB := viper.GetInt("redis.db")
-	cfg := &config.Configure{
-		Redis: &config.RedisConfig{
-			Host:        addr,
-			Password:    redisPassword,
-			Database:    redisDB,
-			IdleTimeout: 10 * time.Minute,
-		},
-	}
-	redisClient, RedisErr := redis.InitRedis(cfg.Redis)
+	//addr := viper.GetString("redis.host")
+	//redisPort := viper.GetInt("redis.port")
+	//addr = addr + ":" + strconv.Itoa(redisPort)
+	//redisPassword := viper.GetString("redis.password")
+	//redisDB := viper.GetInt("redis.db")
+	//cfg := &config.Configure{
+	//	Redis: &config.RedisConfig{
+	//		Host:        addr,
+	//		Password:    redisPassword,
+	//		Database:    redisDB,
+	//		IdleTimeout: 10 * time.Minute,
+	//	},
+	//}
+	_, RedisErr := redis.InitRedis()
 	if RedisErr != nil {
 		panic(RedisErr)
 	}
-	cfg.RedisClient = &config.Redis{Client: redisClient.Client}
+
 	// --------------------------------------------------------
 	var err error
 	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=True&loc=Local", user, password, host, port, name)

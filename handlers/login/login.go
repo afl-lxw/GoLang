@@ -1,18 +1,25 @@
 package login
 
 import (
+	"Golang/config"
+	"Golang/utils"
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/mojocn/base64Captcha"
 	"gorm.io/gorm"
 	"net/http"
 )
 
 type LoginType struct {
-	db *gorm.DB
+	db     *gorm.DB
+	config *config.Configure
 }
 
 func NewLogin(db *gorm.DB) *LoginType {
-	return &LoginType{db: db}
+	redisClient := &config.Configure{
+		Redis:       &config.RedisConfig{},
+		RedisClient: &config.Redis{},
+	}
+	return &LoginType{db: db, config: redisClient}
 }
 
 type LoginForm struct {
@@ -33,12 +40,9 @@ func (h *LoginType) Login(c *gin.Context) {
 
 	// TODO: 验证验证码是否正确
 	// 验证验证码是否正确
-	if !CheckCaptcha(mobile, captcha) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": "验证码错误",
-		})
-		return
-	}
+	fmt.Println("captcha: ", captcha)
+	fmt.Println("mobile: ", mobile)
+
 	// TODO: 验证用户名和密码是否正确
 
 	// 登录成功
@@ -52,11 +56,16 @@ func (h *LoginType) LoginOut(c *gin.Context) {
 }
 
 func (h *LoginType) Captcha(c *gin.Context) {
-	//var store base64Captcha.Store = redis.RedisStore{}
-	driver := base64Captcha.NewDriverDigit(80, 240, 4, 0.7, 80)
-	captcha := base64Captcha.NewCaptcha(driver, base64Captcha.DefaultMemStore)
 
-	if id, b64s, err := captcha.Generate(); err == nil {
+	if id, b64s, err := utils.MakeCaptcha(); err == nil {
+		//err := h.config.RedisClient.Client.Set("captcha_id", id, 0)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "验证码生成失败",
+				"error":   err.Error(),
+			})
+			return
+		}
 		c.JSON(http.StatusOK, gin.H{
 			"captcha_id": id,
 			"image_data": b64s,
@@ -64,14 +73,4 @@ func (h *LoginType) Captcha(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
-}
-
-// CheckCaptcha 验证验证码是否正确
-func CheckCaptcha(mobile, captcha string) bool {
-	// 从缓存或数据库中查找验证码
-	//storedCaptcha := GetCaptchaFromCache(mobile)
-
-	// 比对验证码是否一致
-	//return storedCaptcha == captcha
-	return true
 }

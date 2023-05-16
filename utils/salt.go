@@ -23,7 +23,7 @@ func RandSalt() ([]byte, error) {
 	if err != nil {
 		return salt, err
 	}
-	fmt.Println("---- salt ----%v", salt)
+	fmt.Printf("---- salt ----%v\n", salt)
 
 	return salt, err
 }

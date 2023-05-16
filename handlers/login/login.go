@@ -69,8 +69,13 @@ func (h *LoginType) Login(c *gin.Context) {
 		return
 	}
 
+	token, error := utils.GenerateJWT(h.user.UserId)
+	if error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "生成token失败", "error": error.Error()})
+		return
+	}
 	// 登录成功
-	c.JSON(http.StatusOK, gin.H{"message": "login successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "login successfully", "token": token})
 }
 
 func (h *LoginType) LoginOut(c *gin.Context) {

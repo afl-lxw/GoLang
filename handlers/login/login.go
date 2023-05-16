@@ -80,14 +80,13 @@ func (h *LoginType) Login(c *gin.Context) {
 
 func (h *LoginType) LoginOut(c *gin.Context) {
 	c.JSON(200, gin.H{"message": "退出登录"})
-
 	return
 }
 
 func (h *LoginType) Captcha(c *gin.Context) {
 
 	if id, b64s, err := utils.MakeCaptcha(); err == nil {
-		//err := h.config.RedisClient.Client.Set("captcha_id", id, 0)
+		//err := redis.Redis.Set().Err()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"message": "验证码生成失败",

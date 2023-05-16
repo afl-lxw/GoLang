@@ -24,10 +24,10 @@ func MakeCaptcha() (string, string, error) {
 		Length:          4,                                      //长度
 		Source:          "1234567890qwertyuioplkjhgfdsazxcvbnm", //验证码随机字符串来源
 		BgColor: &color.RGBA{ // 背景颜色
-			R: 3,
-			G: 102,
-			B: 214,
-			A: 125,
+			R: 255,
+			G: 255,
+			B: 255,
+			A: 255,
 		},
 		Fonts: []string{"wqy-microhei.ttc"}, // 字体
 	}

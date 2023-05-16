@@ -2,6 +2,7 @@ package login
 
 import (
 	"Golang/config"
+	"Golang/models/user"
 	"Golang/utils"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -11,6 +12,7 @@ import (
 type LoginType struct {
 	db     *gorm.DB
 	config *config.Configure
+	user   *user.User
 }
 
 func NewLogin(db *gorm.DB) *LoginType {
@@ -18,7 +20,7 @@ func NewLogin(db *gorm.DB) *LoginType {
 		Redis:       &config.RedisConfig{},
 		RedisClient: &config.Redis{},
 	}
-	return &LoginType{db: db, config: redisClient}
+	return &LoginType{db: db, config: redisClient, user: &user.User{}}
 }
 
 type LoginForm struct {
@@ -42,9 +44,30 @@ func (h *LoginType) Login(c *gin.Context) {
 
 	// TODO: 验证验证码是否正确
 	// 验证验证码是否正确
-	capValue := utils.VerifyCaptcha(form.Id, form.Captcha)
-	println("capValue: ", capValue)
+	//capValue := utils.VerifyCaptcha(form.Id, form.Captcha)
+	//if !capValue {
+	//	c.JSON(http.StatusBadRequest, gin.H{"message": "验证码错误"})
+	//	return
+	//}
+	//println("capValue: ", capValue)
 	// TODO: 验证用户名和密码是否正确
+	// 根据用户手机号码查询用户信息
+
+	if err := h.db.Where("mobile = ?", mobile).First(h.user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "用户不存在"})
+		return
+	}
+	println("h.user: ", h.user.Mobile)
+	println("h.username: ", h.user.Username)
+	println("h.password: ", h.user.Password)
+	println("h.salt: ", h.user.Salt)
+
+	passwordHandle := utils.PasswordVerify(h.user.Password, password)
+	println("passwordHandle: ", passwordHandle)
+	if !passwordHandle {
+		c.JSON(http.StatusBadRequest, gin.H{"message": "密码错误"})
+		return
+	}
 
 	// 登录成功
 	c.JSON(http.StatusOK, gin.H{"message": "login successfully"})

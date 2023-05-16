@@ -54,7 +54,6 @@ func InitDB() {
 	//}
 	redisConfig, RedisErr := redis.InitRedis()
 	println("redisConfig:----->", redisConfig)
-
 	if RedisErr != nil {
 		panic(RedisErr)
 	}

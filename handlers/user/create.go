@@ -5,9 +5,11 @@ import (
 	"Golang/utils"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -41,7 +43,42 @@ func (h *UserCreate) UserCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "请求错误"})
 		return
 	}
-
+	validate := validator.New()
+	validate.RegisterValidation("complexity", func(fl validator.FieldLevel) bool {
+		password := fl.Field().String()
+		// 定义密码复杂度要求
+		minLength := 8 // 最小长度为8
+		// 验证密码长度
+		if len(password) < minLength {
+			return false
+		}
+		// 验证是否包含大写字母
+		if !containsUppercase(password) {
+			return false
+		}
+		// 验证是否包含小写字母
+		if !containsLowercase(password) {
+			return false
+		}
+		// 验证是否包含数字
+		if !containsDigit(password) {
+			return false
+		}
+		// 验证是否包含特殊字符
+		if !containsSpecialCharacters(password) {
+			return false
+		}
+		return true
+	})
+	err := validate.Struct(h.userType)
+	if err != nil {
+		for _, err := range err.(validator.ValidationErrors) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "message": "请求错误"})
+			return
+		}
+	} else {
+		fmt.Println("Validation passed")
+	}
 	h.userType.UserId = uuid.New()
 	// 校验并设置性别
 	if h.userType.Sex == "" {
@@ -51,6 +88,13 @@ func (h *UserCreate) UserCreate(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid sex"})
 		return
 	}
+
+	if utils.ValidatePhone(strconv.FormatInt(h.userType.Mobile, 10)) {
+	} else {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "手机号格式错误"})
+		return
+	}
+
 	h.userType.CreatedAt = time.Now()
 	h.userType.UpdatedAt = time.Now()
 
@@ -74,4 +118,47 @@ func (h *UserCreate) UserCreate(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"Data": true, "Message": "创建成功"})
+}
+
+// 判断字符串是否包含大写字母
+func containsUppercase(s string) bool {
+	for _, char := range s {
+		if char >= 'A' && char <= 'Z' {
+			return true
+		}
+	}
+	return false
+}
+
+// 判断字符串是否包含小写字母
+func containsLowercase(s string) bool {
+	for _, char := range s {
+		if char >= 'a' && char <= 'z' {
+			return true
+		}
+	}
+	return false
+}
+
+// 判断字符串是否包含数字
+func containsDigit(s string) bool {
+	for _, char := range s {
+		if char >= '0' && char <= '9' {
+			return true
+		}
+	}
+	return false
+}
+
+// 判断字符串是否包含特殊字符
+func containsSpecialCharacters(s string) bool {
+	specialCharacters := []rune{'!', '@', '#', '$', '%', '^', '&', '*'}
+	for _, char := range s {
+		for _, specialChar := range specialCharacters {
+			if char == specialChar {
+				return true
+			}
+		}
+	}
+	return false
 }

@@ -15,7 +15,7 @@ var signingKey = []byte("Golang-signing-key")
 // 定义 JWT 的有效期
 var tokenExpiration = 24 * time.Hour
 
-// GenerateJWT 生成 JWT
+// GenerateJWT 生成 JWT-
 func GenerateJWT(userID uuid.UUID) (string, error) {
 	// 创建 JWT 的声明
 	claims := jwt.MapClaims{

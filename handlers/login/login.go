@@ -43,7 +43,7 @@ func (h *LoginType) Login(c *gin.Context) {
 	}
 
 	// TODO: 验证验证码是否正确
-	// 验证验证码是否正确
+	// 验证验证码是否正确-
 	//capValue := utils.VerifyCaptcha(form.Id, form.Captcha)
 	//if !capValue {
 	//	c.JSON(http.StatusBadRequest, gin.H{"message": "验证码错误"})

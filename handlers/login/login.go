@@ -35,7 +35,7 @@ func (h *LoginType) Login(c *gin.Context) {
 	password := c.PostForm("password")
 	captcha := c.PostForm("captcha")
 	id := c.PostForm("id")
-	println("id: ", id, "captcha: ", captcha, "mobile: ", mobile, "password: ", password)
+	println("id-: ", id, "captcha: ", captcha, "mobile: ", mobile, "password: ", password)
 	var form LoginForm
 	if err := c.ShouldBind(&form); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

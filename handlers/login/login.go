@@ -43,7 +43,7 @@ func (h *LoginType) Login(c *gin.Context) {
 	}
 
 	// TODO: 验证验证码是否正确
-	// 验证验证码是否正确
+	// 验证验证码是否正确-
 	//capValue := utils.VerifyCaptcha(form.Id, form.Captcha)
 	//if !capValue {
 	//	c.JSON(http.StatusBadRequest, gin.H{"message": "验证码错误"})
@@ -51,7 +51,7 @@ func (h *LoginType) Login(c *gin.Context) {
 	//}
 	//println("capValue: ", capValue)
 	// TODO: 验证用户名和密码是否正确
-	// 根据用户手机号码查询用户信息
+	// 根据用户手机号码查询用户信息--
 
 	if err := h.db.Where("mobile = ?", mobile).First(h.user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": "用户不存在"})

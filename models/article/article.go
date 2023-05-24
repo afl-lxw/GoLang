@@ -1,12 +1,12 @@
 package article
 
 import (
-	"gorm.io/gorm"
 	"time"
 )
 
 type Article struct {
-	gorm.Model
+	//gorm.Model
+	ID        uint      `gorm:"primary_key; auto_increment; comment:'主键ID'; type:int(11); not null"`
 	Title     string    `gorm:"column:title; comment:'标题'; type:varchar(100); not null"`
 	Content   string    `gorm:"column:content; comment:'内容'; type:longtext; not null"`
 	Author    string    `gorm:"type:varchar(20); not null"`

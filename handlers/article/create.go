@@ -12,7 +12,7 @@ import (
 type ArticleType struct {
 	db      *gorm.DB
 	config  *config.Configure
-	article *article.ArticleField
+	article *article.Article
 }
 
 func NewArticle(db *gorm.DB) *ArticleType {
@@ -20,7 +20,7 @@ func NewArticle(db *gorm.DB) *ArticleType {
 		Redis:       &config.RedisConfig{},
 		RedisClient: &config.Redis{},
 	}
-	d := &article.ArticleField{}
+	d := &article.Article{}
 	return &ArticleType{db: db, config: redisClient, article: d}
 }
 
@@ -33,8 +33,8 @@ func (h *ArticleType) CreateArticle(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("%+v", h.article.Title)
-	fmt.Printf("%+v", h.article.Content)
+	fmt.Printf("%+v \n", h.article.Title)
+	fmt.Printf("%+v \n", h.article.Content)
 
 	result := h.db.Create(h.article)
 	if result.Error != nil {

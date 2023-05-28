@@ -89,7 +89,7 @@ func (h *LoginType) Captcha(c *gin.Context) {
 		//err := redis.Redis.Set().Err()
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "验证码生成失败-",
+				"message": "验证码生成失败--",
 				"error":   err.Error(),
 			})
 			return

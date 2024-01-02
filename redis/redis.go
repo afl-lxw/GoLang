@@ -4,11 +4,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/spf13/viper"
 	"strconv"
 	"time"
-
-	"github.com/go-redis/redis/v8"
 )
 
 type Redis struct {
